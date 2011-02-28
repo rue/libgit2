@@ -37,12 +37,12 @@ BEGIN_TEST("readtag", loose_tag_reference_looking_up)
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&reference, repo, loose_tag_ref_name));
+	must_pass(git_reference_lookup(&reference, repo, loose_tag_ref_name));
 	must_be_true(reference->type & GIT_REF_OID);
 	must_be_true((reference->type & GIT_REF_PACKED) == 0);
 	must_be_true(strcmp(reference->name, loose_tag_ref_name) == 0);
 
-	must_pass(git_repository_lookup(&object, repo, git_reference_oid(reference), GIT_OBJ_ANY));
+	must_pass(git_object_lookup(&object, repo, git_reference_oid(reference), GIT_OBJ_ANY));
 	must_be_true(object != NULL);
 	must_be_true(git_object_type(object) == GIT_OBJ_TAG);
 
@@ -54,7 +54,7 @@ BEGIN_TEST("readtag", non_existing_tag_reference_looking_up)
 	git_reference *reference;
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
-	must_fail(git_repository_lookup_ref(&reference, repo, non_existing_tag_ref_name));
+	must_fail(git_reference_lookup(&reference, repo, non_existing_tag_ref_name));
 
 	git_repository_free(repo);
 END_TEST
@@ -71,7 +71,7 @@ BEGIN_TEST("readsymref", symbolic_reference_looking_up)
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&reference, repo, GIT_HEAD_FILE));
+	must_pass(git_reference_lookup(&reference, repo, GIT_HEAD_FILE));
 	must_be_true(reference->type & GIT_REF_SYMBOLIC);
 	must_be_true((reference->type & GIT_REF_PACKED) == 0);
 	must_be_true(strcmp(reference->name, GIT_HEAD_FILE) == 0);
@@ -79,7 +79,7 @@ BEGIN_TEST("readsymref", symbolic_reference_looking_up)
 	must_pass(git_reference_resolve(&resolved_ref, reference));
 	must_be_true(resolved_ref->type == GIT_REF_OID);
 
-	must_pass(git_repository_lookup(&object, repo, git_reference_oid(resolved_ref), GIT_OBJ_ANY));
+	must_pass(git_object_lookup(&object, repo, git_reference_oid(resolved_ref), GIT_OBJ_ANY));
 	must_be_true(object != NULL);
 	must_be_true(git_object_type(object) == GIT_OBJ_COMMIT);
 
@@ -97,7 +97,7 @@ BEGIN_TEST("readsymref", nested_symbolic_reference_looking_up)
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&reference, repo, head_tracker_sym_ref_name));
+	must_pass(git_reference_lookup(&reference, repo, head_tracker_sym_ref_name));
 	must_be_true(reference->type & GIT_REF_SYMBOLIC);
 	must_be_true((reference->type & GIT_REF_PACKED) == 0);
 	must_be_true(strcmp(reference->name, head_tracker_sym_ref_name) == 0);
@@ -105,7 +105,7 @@ BEGIN_TEST("readsymref", nested_symbolic_reference_looking_up)
 	must_pass(git_reference_resolve(&resolved_ref, reference));
 	must_be_true(resolved_ref->type == GIT_REF_OID);
 
-	must_pass(git_repository_lookup(&object, repo, git_reference_oid(resolved_ref), GIT_OBJ_ANY));
+	must_pass(git_object_lookup(&object, repo, git_reference_oid(resolved_ref), GIT_OBJ_ANY));
 	must_be_true(object != NULL);
 	must_be_true(git_object_type(object) == GIT_OBJ_COMMIT);
 
@@ -121,15 +121,15 @@ BEGIN_TEST("readsymref", looking_up_head_then_master)
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&reference, repo, head_tracker_sym_ref_name));
+	must_pass(git_reference_lookup(&reference, repo, head_tracker_sym_ref_name));
 	must_pass(git_reference_resolve(&resolved_ref, reference));
 	comp_base_ref = resolved_ref;
 
-	must_pass(git_repository_lookup_ref(&reference, repo, GIT_HEAD_FILE));
+	must_pass(git_reference_lookup(&reference, repo, GIT_HEAD_FILE));
 	must_pass(git_reference_resolve(&resolved_ref, reference));
 	must_pass(git_oid_cmp(git_reference_oid(comp_base_ref), git_reference_oid(resolved_ref)));
 
-	must_pass(git_repository_lookup_ref(&reference, repo, current_head_target));
+	must_pass(git_reference_lookup(&reference, repo, current_head_target));
 	must_pass(git_reference_resolve(&resolved_ref, reference));
 	must_pass(git_oid_cmp(git_reference_oid(comp_base_ref), git_reference_oid(resolved_ref)));
 
@@ -142,8 +142,8 @@ BEGIN_TEST("readsymref", looking_up_master_then_head)
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&master_ref, repo, current_head_target));
-	must_pass(git_repository_lookup_ref(&reference, repo, GIT_HEAD_FILE));
+	must_pass(git_reference_lookup(&master_ref, repo, current_head_target));
+	must_pass(git_reference_lookup(&reference, repo, GIT_HEAD_FILE));
 
 	must_pass(git_reference_resolve(&resolved_ref, reference));
 	must_pass(git_oid_cmp(git_reference_oid(master_ref), git_reference_oid(resolved_ref)));
@@ -161,12 +161,12 @@ BEGIN_TEST("readpackedref", packed_reference_looking_up)
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&reference, repo, packed_head_name));
+	must_pass(git_reference_lookup(&reference, repo, packed_head_name));
 	must_be_true(reference->type & GIT_REF_OID);
 	must_be_true((reference->type & GIT_REF_PACKED) != 0);
 	must_be_true(strcmp(reference->name, packed_head_name) == 0);
 
-	must_pass(git_repository_lookup(&object, repo, git_reference_oid(reference), GIT_OBJ_ANY));
+	must_pass(git_object_lookup(&object, repo, git_reference_oid(reference), GIT_OBJ_ANY));
 	must_be_true(object != NULL);
 	must_be_true(git_object_type(object) == GIT_OBJ_COMMIT);
 
@@ -178,8 +178,8 @@ BEGIN_TEST("readpackedref", packed_exists_but_more_recent_loose_reference_is_ret
 	git_reference *reference;
 
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
-	must_pass(git_repository_lookup_ref(&reference, repo, packed_head_name));
-	must_pass(git_repository_lookup_ref(&reference, repo, packed_test_head_name));
+	must_pass(git_reference_lookup(&reference, repo, packed_head_name));
+	must_pass(git_reference_lookup(&reference, repo, packed_test_head_name));
 	must_be_true(reference->type & GIT_REF_OID);
 	must_be_true((reference->type & GIT_REF_PACKED) == 0);
 	must_be_true(strcmp(reference->name, packed_test_head_name) == 0);
@@ -206,7 +206,7 @@ BEGIN_TEST("createref", create_new_symbolic_ref)
 	must_pass(git_reference_create_symbolic(&new_reference, repo, new_head_tracker, current_head_target));
 
 	/* Ensure the reference can be looked-up... */
-	must_pass(git_repository_lookup_ref(&looked_up_ref, repo, new_head_tracker));
+	must_pass(git_reference_lookup(&looked_up_ref, repo, new_head_tracker));
 	must_be_true(looked_up_ref->type & GIT_REF_SYMBOLIC);
 	must_be_true((looked_up_ref->type & GIT_REF_PACKED) == 0);
 	must_be_true(strcmp(looked_up_ref->name, new_head_tracker) == 0);
@@ -223,7 +223,7 @@ BEGIN_TEST("createref", create_new_symbolic_ref)
 	/* Similar test with a fresh new repository */
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&looked_up_ref, repo, new_head_tracker));
+	must_pass(git_reference_lookup(&looked_up_ref, repo, new_head_tracker));
 	must_pass(git_reference_resolve(&resolved_ref, looked_up_ref));
 	must_be_true(git_oid_cmp(&id, git_reference_oid(resolved_ref)) == 0);
 
@@ -246,7 +246,7 @@ BEGIN_TEST("createref", create_deep_symbolic_ref)
 
 	git__joinpath(ref_path, repo->path_repository, new_head_tracker);
 	must_pass(git_reference_create_symbolic(&new_reference, repo, new_head_tracker, current_head_target));
-	must_pass(git_repository_lookup_ref(&looked_up_ref, repo, new_head_tracker));
+	must_pass(git_reference_lookup(&looked_up_ref, repo, new_head_tracker));
 	must_pass(git_reference_resolve(&resolved_ref, looked_up_ref));
 	must_be_true(git_oid_cmp(&id, git_reference_oid(resolved_ref)) == 0);
 
@@ -274,7 +274,7 @@ BEGIN_TEST("createref", create_new_object_id_ref)
 	must_pass(git_reference_create_oid(&new_reference, repo, new_head, &id));
 
 	/* Ensure the reference can be looked-up... */
-	must_pass(git_repository_lookup_ref(&looked_up_ref, repo, new_head));
+	must_pass(git_reference_lookup(&looked_up_ref, repo, new_head));
 	must_be_true(looked_up_ref->type & GIT_REF_OID);
 	must_be_true((looked_up_ref->type & GIT_REF_PACKED) == 0);
 	must_be_true(strcmp(looked_up_ref->name, new_head) == 0);
@@ -287,7 +287,7 @@ BEGIN_TEST("createref", create_new_object_id_ref)
 	/* Similar test with a fresh new repository */
 	must_pass(git_repository_open(&repo, REPOSITORY_FOLDER));
 
-	must_pass(git_repository_lookup_ref(&looked_up_ref, repo, new_head));
+	must_pass(git_reference_lookup(&looked_up_ref, repo, new_head));
 	must_be_true(git_oid_cmp(&id, git_reference_oid(looked_up_ref)) == 0);
 
 	git_repository_free(repo);
