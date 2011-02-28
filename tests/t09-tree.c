@@ -101,8 +101,6 @@ BEGIN_TEST("modify", tree_in_memory_add_test)
 	must_pass(git_object_write((git_object *)tree));
 	must_pass(remove_loose_object(REPOSITORY_FOLDER, (git_object *)tree));
 
-	git_object_free((git_object *)tree);
-
 	git_repository_free(repo);
 END_TEST
 
@@ -152,7 +150,6 @@ BEGIN_TEST("modify", tree_add_entry_test)
 */
 
 	must_pass(remove_loose_object(REPOSITORY_FOLDER, (git_object *)tree));
-	git_object_free((git_object *)tree);
 	git_repository_free(repo);
 END_TEST
 
