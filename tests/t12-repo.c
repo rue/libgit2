@@ -64,7 +64,7 @@ int test_backend_sorting(git_odb *odb)
 	return GIT_SUCCESS;
 }
 
-BEGIN_TEST("odb", backend_sorting)
+BEGIN_TEST(odb0, "assure that ODB backends are properly sorted")
 	git_odb *odb;
 	must_pass(git_odb_new(&odb));
 	must_pass(git_odb_add_backend(odb, new_backend(0), 5));
@@ -75,7 +75,7 @@ BEGIN_TEST("odb", backend_sorting)
 	git_odb_close(odb);
 END_TEST
 
-BEGIN_TEST("odb", backend_alternates_sorting)
+BEGIN_TEST(odb1, "assure that alternate backends are properly sorted")
 	git_odb *odb;
 	must_pass(git_odb_new(&odb));
 	must_pass(git_odb_add_backend(odb, new_backend(0), 5));
@@ -113,7 +113,7 @@ static void ensure_repository_init(git_test *_gittest, char *working_directory, 
 	must_pass(rmdir_recurs(working_directory));
 }
 
-BEGIN_TEST("repo_initialization", init_standard_repo)
+BEGIN_TEST(init0, "initialize a standard repo")
 	char path_index[GIT_PATH_MAX], path_repository[GIT_PATH_MAX];
 
 	git__joinpath(path_repository, TEMP_DIR, GIT_DIR);
@@ -123,7 +123,7 @@ BEGIN_TEST("repo_initialization", init_standard_repo)
 	ensure_repository_init(_gittest, TEMP_DIR_WITHOUT_TRAILING_SLASH, STANDARD_REPOSITORY, path_index, path_repository, TEMP_DIR);
 END_TEST
 
-BEGIN_TEST("repo_initialization", init_bare_repo)
+BEGIN_TEST(init1, "initialize a bare repo")
 	char path_repository[GIT_PATH_MAX];
 
 	git__joinpath(path_repository, TEMP_DIR, "");
@@ -132,14 +132,11 @@ BEGIN_TEST("repo_initialization", init_bare_repo)
 	ensure_repository_init(_gittest, TEMP_DIR_WITHOUT_TRAILING_SLASH, BARE_REPOSITORY, NULL, path_repository, NULL);
 END_TEST
 
-git_testsuite *libgit2_suite_repository(void)
-{
-	git_testsuite *suite = git_testsuite_new("Repository");
 
-	ADD_TEST(suite, "odb", backend_sorting);
-	ADD_TEST(suite, "odb", backend_alternates_sorting);
-	ADD_TEST(suite, "repo_initialization", init_standard_repo);
-	ADD_TEST(suite, "repo_initialization", init_bare_repo);
+BEGIN_SUITE(repository)
+	ADD_TEST(odb0);
+	ADD_TEST(odb1);
+	ADD_TEST(init0);
+	ADD_TEST(init1);
+END_SUITE
 
-	return suite;
-}
